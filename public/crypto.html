@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crypto Price Checker</title>
+    <link rel="stylesheet" href="styles.css">
+    <script defer src="script.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h2>Crypto Price Checker</h2>
+        <button onclick="goHome()">⬅ Back</button>
+
+        <div class="input-container">
+            <input type="text" id="cryptoSymbol" placeholder="Enter Crypto Symbol">
+            <button onclick="fetchCryptoPrice()">Get Crypto Price</button>
+        </div>
+
+        <div id="cryptoOutput" class="output-container">
+            <p>Enter a crypto symbol above.</p>
+        </div>
+
+        <button id="addCryptoButton" onclick="addToDashboard('crypto')" style="display:none;">Add to Dashboard</button>
+    </div>
+</body>
+</html>

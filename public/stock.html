@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stock Price Checker</title>
+    <link rel="stylesheet" href="styles.css">
+    <script defer src="script.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h2>Stock Price Checker</h2>
+        <button onclick="goHome()">⬅ Back</button>
+
+        <div class="input-container">
+            <input type="text" id="stockSymbol" placeholder="Enter Stock Symbol">
+            <button onclick="fetchStockPrice()">Get Stock Price</button>
+        </div>
+
+        <div id="stockOutput" class="output-container">
+            <p>Enter a stock symbol above.</p>
+        </div>
+
+        <button id="addStockButton" onclick="addToDashboard('stock')" style="display:none;">Add to Dashboard</button>
+    </div>
+</body>
+</html>
