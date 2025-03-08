@@ -117,3 +117,16 @@ function fetchCryptoPrice() {
         })
         .catch(error => console.error('Error fetching crypto data:', error));
 }
+const backendURL = "stockapp-production-1acf.up.railway.app";
+
+async function fetchPrice(type, symbol) {
+    if (type === 'stock') {
+        let response = await fetch(`${backendURL}/stock/${symbol}`);
+        let data = await response.json();
+        return data.c ? data.c.toFixed(2) : null;
+    } else {
+        let response = await fetch(`${backendURL}/crypto/${symbol}`);
+        let data = await response.json();
+        return data.quote && data.quote.USD.price ? data.quote.USD.price.toFixed(2) : null;
+    }
+}
