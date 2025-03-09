@@ -117,17 +117,5 @@ function fetchCryptoPrice() {
         })
         .catch(error => console.error('Error fetching crypto data:', error));
 }
-const BACKEND_URL = "https://stockapp-sb4d.onrender.com/index.html";
 
-async function fetchPrice(type, symbol) {
-    if (type === 'stock') {
-        let response = await fetch(`${BACKEND_URL}/stock/${symbol}`);
-        let data = await response.json();
-        return data.c ? data.c.toFixed(2) : null;
-    } else {
-        let response = await fetch(`${BACKEND_URL}/crypto/${symbol}`);
-        let data = await response.json();
-        return data.quote && data.quote.USD.price ? data.quote.USD.price.toFixed(2) : null;
-    }
-}
 
