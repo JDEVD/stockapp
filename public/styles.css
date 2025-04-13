@@ -17,6 +17,21 @@ body {
     margin-right: auto;
 }
 
+button.ai-assistant {
+    background-color: #0073ee; /* Bootstrap-like blue */
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 10px;
+    font-size: 16px;
+    margin-left: 10px;
+    cursor: pointer;
+}
+
+button.ai-assistant:hover {
+    background-color: #0073ee;
+}
+
 button {
     padding: 10px;
     font-size: 16px;

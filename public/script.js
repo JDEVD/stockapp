@@ -4,7 +4,7 @@ function goHome() {
 
 async function addToDashboard(type) {
     let symbol = type === 'stock' ? document.getElementById('stockSymbol').value.toUpperCase() :
-                                     document.getElementById('cryptoSymbol').value.toUpperCase();
+        document.getElementById('cryptoSymbol').value.toUpperCase();
 
     if (!symbol) {
         alert("Please search for a valid stock/crypto before adding to the dashboard!");
@@ -89,10 +89,23 @@ function fetchStockPrice() {
                     `;
 
                     document.getElementById('addStockButton').style.display = "block";
+                    document.getElementById('aiAssistantStock').style.display = "block";
+
                 });
         })
         .catch(error => console.error('Error fetching stock data:', error));
 }
+function goToAI(type) {
+    const symbol = type === 'stock'
+        ? document.getElementById('stockSymbol').value.toUpperCase()
+        : document.getElementById('cryptoSymbol').value.toUpperCase();
+
+    
+    const baseUrl = "https://huggingface.co/spaces/JishnuD/stockapp"; 
+
+        window.open(`${baseUrl}?symbol=${symbol}&type=${type}`, '_blank');
+}
+
 
 function fetchCryptoPrice() {
     const symbol = document.getElementById('cryptoSymbol').value.toUpperCase();
@@ -114,6 +127,8 @@ function fetchCryptoPrice() {
             `;
 
             document.getElementById('addCryptoButton').style.display = "block";
+            document.getElementById('aiAssistantCrypto').style.display = "block";
+
         })
         .catch(error => console.error('Error fetching crypto data:', error));
 }
