@@ -83,3 +83,29 @@ th, td {
     padding: 10px;
     border-bottom: 1px solid #ddd;
 }
+
+.google-login-btn {
+    background-color: white;
+    color: #444;
+    font-size: 16px;
+    padding: 10px 16px 10px 42px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    cursor: pointer;
+    position: relative;
+    transition: box-shadow 0.3s ease;
+    font-weight: 500;
+}
+
+.google-login-btn:hover {
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+}
+
+.google-icon {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    height: 20px;
+    width: 20px;
+}
