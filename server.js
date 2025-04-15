@@ -64,6 +64,7 @@ app.get('/auth/google/callback',
 );
 
 app.get('/logout', (req, res) => {
+    dashboardData = [];
   req.logout(() => {
     res.redirect('/');
   });
