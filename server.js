@@ -11,31 +11,25 @@ const axios = require('axios');
 const app = express();
 const PORT = 3000;
 
-// 🔹 In-memory dashboard data (resets when server restarts)
-let dashboardData = [];
-
+// 📁 Middleware Setup
 app.use(cors());
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'login.html'));
+  });
+  
+app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.json());
 
-// ✅ Redirect to login.html by default
-app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'login.html'));
-});
-
-// ✅ Serve static frontend files
-app.use(express.static(path.join(__dirname, 'public')));
-
-// 🔐 Session setup
 app.use(session({
   secret: 'mysecretkey',
   resave: false,
   saveUninitialized: false
 }));
 
-// 🔐 Passport setup
 app.use(passport.initialize());
 app.use(passport.session());
 
+// 🔐 Google OAuth Strategy
 passport.use(new GoogleStrategy({
   clientID: process.env.GOOGLE_CLIENT_ID,
   clientSecret: process.env.GOOGLE_CLIENT_SECRET,
@@ -51,7 +45,12 @@ passport.deserializeUser((user, done) => {
   done(null, user);
 });
 
-// 🔐 Auth routes
+// 🌐 Serve login.html as the landing page instead of index.html
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'login.html'));
+});
+
+// 🔐 Auth Routes
 app.get('/auth/google',
   passport.authenticate('google', { scope: ['profile', 'email'] })
 );
@@ -59,7 +58,7 @@ app.get('/auth/google',
 app.get('/auth/google/callback',
   passport.authenticate('google', { failureRedirect: '/login.html' }),
   (req, res) => {
-    res.redirect('/index.html'); // ✅ Redirect to index.html after login
+    res.redirect('/dashboard.html');
   }
 );
 
@@ -69,62 +68,31 @@ app.get('/logout', (req, res) => {
   });
 });
 
-// 🔒 Middleware to protect routes
+// 🔐 Middleware to Protect Routes
 function ensureAuthenticated(req, res, next) {
   if (req.isAuthenticated()) return next();
   res.redirect('/login.html');
 }
 
-// ✅ Optional: protect dashboard.html
+// 🔒 Protected dashboard route
 app.get('/dashboard.html', ensureAuthenticated, (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'dashboard.html'));
 });
 
-// 🧠 In-memory dashboard routes
-app.post('/dashboard/add', (req, res) => {
-  const { type, symbol } = req.body;
-  if (!type || !symbol) return res.status(400).json({ error: 'Invalid data' });
-
-  if (!dashboardData.some(item => item.symbol === symbol && item.type === type)) {
-    dashboardData.push({ type, symbol });
-  }
-
-  res.json({ message: 'Added to dashboard' });
-});
-
-app.get('/dashboard', async (req, res) => {
-  const updatedData = [];
-
-  for (let item of dashboardData) {
-    try {
-      let price;
-      if (item.type === 'stock') {
-        const stock = await fetchStockPrice(item.symbol);
-        price = stock ? stock.toFixed(2) : "N/A";
-      } else {
-        const crypto = await fetchCryptoPrice(item.symbol);
-        price = crypto ? crypto.toFixed(2) : "N/A";
-      }
-      updatedData.push({ ...item, price });
-    } catch {
-      updatedData.push({ ...item, price: "Error" });
-    }
-  }
-
-  res.json(updatedData);
-});
-
-// ✅ Finnhub and CoinMarketCap APIs
+// 📊 Finnhub Stock API Setup
 const api_key = finnhub.ApiClient.instance.authentications['api_key'];
 api_key.apiKey = process.env.API_KEY;
 const finnhubClient = new finnhub.DefaultApi();
+
+// 💱 CoinMarketCap API Setup
 const COINMARKETCAP_API_KEY = process.env.COINMARKETCAP_API_KEY;
 const CRYPTO_API_URL = 'https://pro-api.coinmarketcap.com/v1/cryptocurrency/quotes/latest';
 
+// 📈 Stock Routes
 app.get('/stock/:symbol', (req, res) => {
   const symbol = req.params.symbol.toUpperCase();
   finnhubClient.quote(symbol, (error, data) => {
-    if (error || !data) return res.status(500).json({ error: 'Stock fetch failed' });
+    if (error || !data) return res.status(500).json({ error: 'Stock data fetch failed' });
     res.json(data);
   });
 });
@@ -132,11 +100,12 @@ app.get('/stock/:symbol', (req, res) => {
 app.get('/stock/info/:symbol', (req, res) => {
   const symbol = req.params.symbol.toUpperCase();
   finnhubClient.companyProfile2({ symbol }, (error, data) => {
-    if (error || !data?.name) return res.status(500).json({ error: 'Company name fetch failed' });
+    if (error || !data || !data.name) return res.status(500).json({ error: 'Company profile fetch failed' });
     res.json({ name: data.name, symbol: data.ticker });
   });
 });
 
+// 🪙 Crypto Route
 app.get('/crypto/:symbol', async (req, res) => {
   try {
     const symbol = req.params.symbol.toUpperCase();
@@ -145,34 +114,12 @@ app.get('/crypto/:symbol', async (req, res) => {
       params: { symbol, convert: 'USD' }
     });
     res.json(response.data.data[symbol]);
-  } catch {
-    res.status(500).json({ error: 'Crypto fetch failed' });
+  } catch (error) {
+    res.status(500).json({ error: 'Crypto data fetch failed' });
   }
 });
 
-// 🔧 Price fetch helpers
-async function fetchStockPrice(symbol) {
-  return new Promise((resolve, reject) => {
-    finnhubClient.quote(symbol, (err, data) => {
-      if (err || !data?.c) return reject();
-      resolve(data.c);
-    });
-  });
-}
-
-async function fetchCryptoPrice(symbol) {
-  try {
-    const response = await axios.get(CRYPTO_API_URL, {
-      headers: { 'X-CMC_PRO_API_KEY': COINMARKETCAP_API_KEY },
-      params: { symbol, convert: 'USD' }
-    });
-    return response.data.data[symbol].quote.USD.price;
-  } catch {
-    return null;
-  }
-}
-
-// ✅ Start server
+// ✅ Start the Server
 app.listen(PORT, () => {
   console.log(`✅ Server running at http://localhost:${PORT}`);
 });
