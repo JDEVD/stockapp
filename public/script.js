@@ -24,26 +24,38 @@ async function addToDashboard(type) {
 async function loadDashboard() {
     let response = await fetch('/dashboard');
     let dashboardItems = await response.json();
-
+  
     if (dashboardItems.length === 0) {
-        document.getElementById('dashboardContent').innerHTML = "<p>No items added to the dashboard yet.</p>";
-        return;
+      document.getElementById('dashboardContent').innerHTML = "<p>No items added to the dashboard yet.</p>";
+      return;
     }
-
+  
     let content = `<h3>Added to Dashboard</h3><table>`;
-    content += "<tr><th>Type</th><th>Symbol</th><th>Price</th></tr>";
-
+    content += "<tr><th>Type</th><th>Symbol</th><th>Price</th><th>Action</th></tr>";
+  
     dashboardItems.forEach(item => {
-        content += `<tr>
-                    <td>${item.type === 'stock' ? "Stock" : "Cryptocurrency"}</td>
-                    <td>${item.symbol}</td>
-                    <td>${item.price ? `$${item.price}` : "N/A"}</td>
-                    </tr>`;
+      content += `<tr>
+        <td>${item.type}</td>
+        <td>${item.symbol}</td>
+        <td>${item.price}</td>
+        <td><button onclick="removeFromDashboard('${item.type}', '${item.symbol}')">Remove</button></td>
+      </tr>`;
     });
-
+  
     content += "</table>";
     document.getElementById('dashboardContent').innerHTML = content;
-}
+  }
+
+  async function removeFromDashboard(type, symbol) {
+    await fetch('/dashboard/remove', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ type, symbol })
+    });
+  
+    loadDashboard(); // Refresh
+  }
+  
 
 async function fetchPrice(type, symbol) {
     if (type === 'stock') {

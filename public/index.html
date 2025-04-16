@@ -6,15 +6,27 @@
     <title>Market Price Checker</title>
     <link rel="stylesheet" href="styles.css">
 </head>
-<body>
+<body onload="loadUser()">
     <div class="topbar">
-        <button class="logout-btn" onclick="window.location.href='/logout'">Logout</button>
-      </div>
-      
-    <div class="container">
-        <h2>Select Market</h2>
-        <button onclick="window.location.href='stock.html'">Stock Market</button>
-        <button onclick="window.location.href='crypto.html'">Cryptocurrency Market</button>
+      <button class="logout-btn" onclick="window.location.href='/logout'">Logout</button>
     </div>
-</body>
+  
+    <div class="container">
+      <h2 id="welcome">Welcome to StockApp</h2>
+  
+      <div class="button-group">
+        <button onclick="window.location.href='stock.html'">Go to Stock Tracker</button>
+        <button onclick="window.location.href='crypto.html'">Go to Crypto Tracker</button>
+        <button onclick="window.location.href='dashboard.html'">View My Dashboard</button>
+      </div>
+    </div>
+  
+    <script>
+      async function loadUser() {
+        const res = await fetch('/user');
+        const data = await res.json();
+        document.getElementById("welcome").innerText = `Hi ${data.firstName}, Welcome to StockApp! `;
+      }
+    </script>
+  </body>
 </html>

@@ -132,3 +132,55 @@ th, td {
 .logout-btn:hover {
     background-color: #c9302c;
 }
+
+.container {
+    text-align: center;
+    padding-top: 60px;
+}
+
+.button-group {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+    margin-top: 30px;
+}
+
+.button-group button {
+    padding: 10px 25px;
+    font-size: 16px;
+    border-radius: 5px;
+    border: none;
+    background-color: green;
+    color: white;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    width: 250px;
+}
+
+.button-group button:hover {
+    background-color: #0c5e0c; 
+}
+
+.topbar {
+    display: flex;
+    justify-content: flex-end;
+    padding: 10px;
+    background-color: #f4f4f4;
+    border-bottom: 1px solid #ddd;
+}
+
+.logout-btn {
+    padding: 8px 16px;
+    font-size: 14px;
+    background-color: #d9534f;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+.logout-btn:hover {
+    background-color: #c9302c;
+}

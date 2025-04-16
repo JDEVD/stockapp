@@ -12,7 +12,7 @@ const app = express();
 const PORT = 3000;
 
 // 🧠 In-memory dashboard (clears on restart)
-let dashboardData = [];
+const userDashboards = {};
 
 app.use(cors());
 app.use(express.json());
@@ -50,6 +50,16 @@ passport.serializeUser((user, done) => {
 passport.deserializeUser((user, done) => {
   done(null, user);
 });
+
+app.get('/user', (req, res) => {
+  if (req.isAuthenticated()) {
+    const firstName = req.user.name?.givenName || 'User';
+    res.json({ firstName });
+  } else {
+    res.status(401).json({ error: 'Not authenticated' });
+  }
+});
+
 
 // 🔐 Auth routes
 app.get('/auth/google',
@@ -124,17 +134,27 @@ app.get('/crypto/:symbol', async (req, res) => {
 
 // ➕ Add item to dashboard
 app.post('/dashboard/add', (req, res) => {
+  if (!req.isAuthenticated()) return res.status(401).json({ error: "Unauthorized" });
+
   const { type, symbol } = req.body;
-  if (!type || !symbol) return res.status(400).json({ error: 'Invalid data' });
+  if (!type || !symbol) return res.status(400).json({ error: "Invalid data" });
 
-  const exists = dashboardData.some(item => item.symbol === symbol && item.type === type);
-  if (!exists) dashboardData.push({ type, symbol });
+  const userId = req.user.id;
+  if (!userDashboards[userId]) userDashboards[userId] = [];
 
-  res.json({ message: 'Added to dashboard' });
+  const exists = userDashboards[userId].some(item => item.symbol === symbol && item.type === type);
+  if (!exists) userDashboards[userId].push({ type, symbol });
+
+  res.json({ message: 'Item added' });
 });
+
 
 // 📥 Get dashboard items with prices
 app.get('/dashboard', async (req, res) => {
+  if (!req.isAuthenticated()) return res.status(401).json([]);
+
+  const userId = req.user.id;
+  const dashboardData = userDashboards[userId] || [];
   const result = [];
 
   for (const item of dashboardData) {
@@ -150,6 +170,20 @@ app.get('/dashboard', async (req, res) => {
 
   res.json(result);
 });
+
+app.post('/dashboard/remove', (req, res) => {
+  if (!req.isAuthenticated()) return res.status(401).json({ error: "Unauthorized" });
+
+  const { type, symbol } = req.body;
+  const userId = req.user.id;
+
+  if (userDashboards[userId]) {
+    userDashboards[userId] = userDashboards[userId].filter(item => !(item.type === type && item.symbol === symbol));
+  }
+
+  res.json({ message: "Item removed" });
+});
+
 
 // 🔧 Helper: stock price
 async function fetchStockPrice(symbol) {
